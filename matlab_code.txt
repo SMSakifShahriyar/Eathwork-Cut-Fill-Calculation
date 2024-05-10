@@ -1,0 +1,908 @@
+function []= excavation1 ()
+        clear all
+        close all
+        clc
+
+        %Total number of stations input
+        stopcri =1;
+        while(stopcri)
+        getvalue= input(' Enter total number of stations : ' );
+        if floor(getvalue)==ceil(getvalue) && getvalue>1
+            totalnumofstation = getvalue;
+            stopcri=0;
+        else
+            fprintf(2,'\n Invalid Input, Try again\n')
+            stopcri=1;
+        end
+        end
+        
+        %Unit Input
+       
+        stopcri =1;
+        while(stopcri)
+        getvalue= input('\n In which unit do you want to calculate ? \n For SI unit,    Enter 1 \n For F.P.S unit, Enter 2    : ');
+        if floor(getvalue)==ceil(getvalue) && (getvalue==1 || getvalue==2)
+            unit = getvalue;
+            stopcri=0;
+        else
+            fprintf(2,'\n Invalid Input, Try again\n')
+            stopcri=1;
+        end
+        end
+
+        %Width Input
+        stopcri=1;
+        while(stopcri)
+            if unit==1
+        width= input('\n Enter width of road in meter :');
+            else
+               width= input('\n Enter width of road in feet :');
+            end
+        if floor(width)==ceil(width) && width>0
+            stopcri=0;
+        else
+            fprintf(2,'\n Invalid Input, Try again\n')
+            stopcri=1;
+        end
+        end
+
+        %Slope for cutting Input
+        stopcri=1;
+        while(stopcri)
+        slopecutinput = input('\n Enter side slope for cutting as V:H [V,H]: ');
+        check = ismatrix(slopecutinput);
+                if check==1 && slopecutinput(1,2)>=slopecutinput(1,1) && floor(slopecutinput(1,1))==ceil(slopecutinput(1,1)) && floor(slopecutinput(1,2))==ceil(slopecutinput(1,2)) && slopecutinput(1,1)>0 && slopecutinput(1,2)>0
+                    stopcri=0;
+                    
+                else
+                    fprintf(2,'\n Invalid Input, Try again\n')
+                    stopcri=1;
+                end
+        end
+
+        slopecut = slopecutinput(1,2)/slopecutinput(1,1);
+        
+        %Slope for filling Input
+        stopcri=1;
+        while(stopcri)
+        slopefillinput = input('\n Enter side slope for filling as V:H [V,H]: ');
+        check = ismatrix(slopefillinput);
+                if check==1 && slopefillinput(1,2)>=slopefillinput(1,1) && floor(slopefillinput(1,1))==ceil(slopefillinput(1,1)) && floor(slopefillinput(1,2))==ceil(slopefillinput(1,2)) && slopefillinput(1,1)>0 && slopefillinput(1,2)>0
+                    stopcri=0;
+                    
+                else
+                    fprintf(2,'\n Invalid Input, Try again\n')
+                    stopcri=1;
+                end
+        end
+
+        slopefill = slopefillinput(1,2)/slopefillinput(1,1);
+
+        %Station Interval Input
+        stopcri=1;
+        while(stopcri)
+                if unit==1
+                getvalue= input('\n Enter Interval Between Stations in Meter: ' );
+                end
+                if unit==2
+                getvalue= input('\n Enter Interval Between Stations in feet: ' );
+                end
+        tf= isnumeric(getvalue);
+        if tf==1 && getvalue>0
+            stationinterval = getvalue;
+            stopcri=0;
+        else
+            fprintf(2,'\n Invalid Input, Try again\n')
+            stopcri=1;
+        end
+        end
+        
+        %Formation level of station 1 input
+        stopcri=1;
+        while(stopcri)
+         if unit==1
+                getvalue= input('\n Enter Formation level of Station 1 in Meter: ' );
+         end
+                if unit==2
+                getvalue= input('\n Enter Formation level of Station 1 in feet: ' );
+                end
+                
+        tf= isnumeric(getvalue);
+        if tf==1
+            formlevel1 = getvalue;
+            stopcri=0;
+        else
+            fprintf(2,'\n Invalid Input, Try again\n')
+            stopcri=1;
+        end
+        end
+        
+        %Yes/no Input
+        stopcri =1;
+        while(stopcri)
+        getinput= input('\n Are there more than one types of longitudinal slope for the road ? \n Enter (Yes) if true \n Enter (No) if false :  ', 's');
+        if (strcmp('Yes',getinput) || strcmp('yes',getinput)||strcmp('YES',getinput)||strcmp('no',getinput)||strcmp('No',getinput))
+        stopcri=0;
+        else
+            fprintf(2,'\n Invalid Input, Try again\n')
+            stopcri=1;
+        end
+        end
+
+
+
+        if (strcmp('Yes',getinput) || strcmp('yes',getinput)||strcmp('YES',getinput))
+        
+        %Types of slope input
+        stopcri =1;
+        while(stopcri)
+        getvalue= input('\n Enter number of different types of slopes : ');
+        if floor(getvalue)==ceil(getvalue) && getvalue>1
+            numofslope = getvalue;
+            stopcri=0;
+        else
+            fprintf(2,'\n Invalid Input, Try again\n')
+            stopcri=1;
+        end
+        end
+            
+        %Downward or upward   
+        stopcri =1;
+        while(stopcri)
+        getvalue= input('\n Are the slopes downward or upward? \n Enter 1 if downward \n Enter 2 if upward     : ');
+        if floor(getvalue)==ceil(getvalue) && (getvalue==1 || getvalue==2)
+            downorup = getvalue;
+            stopcri=0;
+        else
+            fprintf(2,'\n Invalid Input, Try again\n')
+            stopcri=1;
+        end
+        end
+        
+        %indivisual slope input and check if input is equal to station or
+        %not
+        checksum=1;
+        while(checksum)
+        
+            for i=1:numofslope
+
+                stopcri =1;
+                while(stopcri)
+                gradient{i}= input(['\n Enter slope for type ' num2str(i) ' as x in y [x,y]  :']); %slope input
+                check = ismatrix(gradient{i});
+                if check==1 && gradient{i}(1,2)>=gradient{i}(1,1) && floor(gradient{i}(1,1))==ceil(gradient{i}(1,1)) && floor(gradient{i}(1,2))==ceil(gradient{i}(1,2)) && gradient{i}(1,1)>0 && gradient{i}(1,2)>0
+                    stopcri=0;
+                    
+                else
+                    fprintf(2,'\n Invalid Input, Try again\n')
+                    stopcri=1;
+                end
+                end
+
+                
+                %decrement/increment calculation
+                if downorup==1
+                decrement{i} = (stationinterval*gradient{i}(1,1))/gradient{i}(1,2);
+                end
+                if downorup==2
+                decrement{i} = -(stationinterval*gradient{i}(1,1))/gradient{i}(1,2);
+
+                end
+                
+                %number of station for slope type 1 input
+                if(i==1)
+                    stopcri=1;
+                    while(stopcri)
+                numcount{i}= input(['\n Enter number of stations with slope No. ' num2str(i) ' excluding the first station :']);
+                if numcount{i} >=1
+                    stopcri=0;
+                else
+
+                fprintf(2,'\n Invalid Input, Try again\n')
+                stopcri=1;
+                end
+                    end
+
+                end
+ 
+
+
+                %number of stations for slope type != 1 input
+                if(i~=1)
+                    stopcri=1;
+                    while(stopcri)
+                numcount{i}= input(['\n Enter number of stations with slope No. ' num2str(i) ' :']);
+                if numcount{i} >=1
+                    stopcri=0;
+                else
+
+                fprintf(2,'\n Invalid Input, Try again\n')
+                stopcri=1;
+                end
+                    end
+                end
+
+                
+            end
+
+            close all
+
+            %check if input is not equal to stations
+            total=0;
+            for i=1:numofslope
+                total = total + numcount{i};
+            end
+                
+                if total+1 == totalnumofstation
+                    checksum=0;
+                    
+                else
+                     fprintf(2,'\n summation of inputs exceeds total number of stations , Try again\n')
+                     
+                     checksum=1;
+                     break
+                end
+            
+        end
+                    
+
+        
+        FormationRL(1,1)= formlevel1;
+      
+        %Formation RL matrix determination
+        counter=1;
+        for j=1:i
+           if i==1
+               
+               for iter = 2:numcount{j}
+                   FormationRL(1,iter)= FormationRL(1,iter-1)- decrement{j};
+                   counter=counter+1;
+               end
+           end
+            if(i~=1)
+            for k= 1: numcount{j}
+                FormationRL(1,counter+1)= FormationRL(1, counter)- decrement{j};
+                counter=counter+1;
+                
+           
+            end
+            end
+        end
+        
+        %Existing ground level input as a matrix and check input==stations
+        stopcri=1;
+        while(stopcri)
+        RLvector = input('\n Enter existing ground level as a row matix : ');
+        if length(RLvector)==totalnumofstation
+            stopcri=0;
+        else
+            fprintf(2,'\n Total number of inputs exceeds total number of stations , Try again\n')
+            stopcri=1;
+        end
+        end
+       
+        %matrix with boundary RL only
+         value = zeros(2,totalnumofstation);
+        for iter1 = 1: (totalnumofstation-1)
+            diff1 = FormationRL(iter1)-RLvector(iter1);
+            diff2 = FormationRL(iter1+1)-RLvector(iter1+1);
+            test = diff1*diff2;
+            if test<0
+                value(1,iter1) =FormationRL(iter1);
+                value(1,iter1 +1) =FormationRL(iter1 +1);
+                value(2,iter1) =RLvector(iter1);
+                value(2,iter1 +1) =RLvector(iter1 +1);
+            end
+        end 
+            
+            
+        
+        %counting extension of matrix
+        countelement =0;
+         for ii= 1:1
+             for jj= 1: totalnumofstation
+                 if value(ii,jj)>1 && value(ii+1,jj+1)>1
+                     countelement= countelement+1;
+                 end
+             end
+         end
+
+         %inserts zero where there is an intersection between RL and GL and
+         %creates a new RL vector
+        countit =1;
+        newformRLvector = zeros(1,totalnumofstation+countelement);
+         for iter1 = 1: (totalnumofstation-1)
+            diff1 = FormationRL(iter1)-RLvector(iter1);
+            diff2 = FormationRL(iter1+1)-RLvector(iter1+1);
+            test = diff1*diff2;
+            if test>0
+                newformRLvector(1,countit)= FormationRL(iter1);
+                countit=countit+1;
+            end
+            if test==0
+                newformRLvector(1,countit)= FormationRL(iter1);
+                countit=countit+1;
+            end
+            if test<0
+                newformRLvector(1,countit)= FormationRL(iter1);
+                newformRLvector(1,countit+1)= 0;
+                countit= countit+2;
+            end
+         end
+         newformRLvector(1,totalnumofstation+countelement)=FormationRL(totalnumofstation);
+         
+         %inserts zero where there is an intersection between RL and GL and
+         %creates a new GL vector
+         countit=1;
+         newGLvector = zeros(1,totalnumofstation+countelement);
+         for iter1 = 1: (totalnumofstation-1)
+            diff1 = FormationRL(iter1)-RLvector(iter1);
+            diff2 = FormationRL(iter1+1)-RLvector(iter1+1);
+            test = diff1*diff2;
+            if test>0
+                newGLvector(1,countit)= RLvector(iter1);
+                countit=countit+1;
+            end
+            if test==0
+                newGLvector(1,countit)= RLvector(iter1);
+                countit=countit+1;
+            end
+            if test<0
+                newGLvector(1,countit)= RLvector(iter1);
+                newGLvector(1,countit+1)= 0;
+                countit= countit+2;
+            end
+         end
+         newGLvector(1,totalnumofstation+countelement)=RLvector(totalnumofstation);
+
+         
+         
+         %calculating depth
+         x= totalnumofstation+countelement;
+         depth = zeros(1, x);
+         for i= 1:x
+             depth(1,i)= newformRLvector(i) - newGLvector(i);
+         end
+         
+         %calculating average depth
+         xx = totalnumofstation+countelement-1;
+         avgdepth = zeros(1, xx);
+         for i=1:xx
+             avgdepth(1,i)= (depth(1,i)+depth(1,i+1))/2; 
+         end
+         
+         %creating interval vector considering intersections
+         X= zeros(1,xx);
+         
+         i=1;
+         while i<=xx
+             
+             if depth(1,i)*depth(1,i+1)~=0
+                 X(1,i)= stationinterval;
+             end
+             if depth(1,i)*depth(1,i+1)==0 && newGLvector(1,i+1)~=0
+                 X(1,i)= stationinterval;
+             end
+             if depth(1,i)*depth(1,i+1)==0 && newGLvector(1,i+1)==0
+                 X(1,i)= (stationinterval*abs(depth(1,i)))/(abs(depth(1,i)) + abs(depth(1, i+2)));
+                 X(1,i+1)= stationinterval- X(1,i);
+                 i= i+1;
+             end
+             i=i+1;
+         end
+
+        %Choosing Method
+        
+        stopcri=1;
+        while(stopcri)
+        method  = input ('\nBy which method do you want to calculate?\n\n Enter 1, for Average Height Method / Mid Section Formulae \n Enter 2, For Trapezoidal Formulae / Average End Area Method / Mean Sectional Area Method \n Enter 3, For Prismoidal Formulae        :');
+        
+        if method==1 || method==2 || method==3
+            stopcri=0;
+        else
+            fprintf(2,'\n Invalid Input , Try again\n')
+            stopcri=1;
+        end
+        end
+
+
+        Afill=zeros(1,xx);
+        Vfill=zeros(1,xx);
+        Acut=zeros(1,xx);
+        Vcut=zeros(1,xx);
+        
+        %calculating Area and Volume for average height method
+        if method==1
+        for i= 1:xx
+            if avgdepth(1,i)>0
+                Afill(1,i) =  ((width + (slopefill*abs(avgdepth(1,i))))*abs(avgdepth(1,i)));
+                Vfill(1,i) =  X(i) * Afill(1,i);
+            end
+
+            if avgdepth(1,i)<0
+                Acut(1,i) =  ((width + (slopecut*abs(avgdepth(1,i))))*abs(avgdepth(1,i)));
+                Vcut(1,i) =  X(i) * Acut(1,i);
+            end
+            if avgdepth(1,i)==0
+                Acut(1,i)=0;
+                Afill(1,i)=0;
+                Vcut(1,i)=0;
+                Vfill(1,i)=0;
+            end
+        end
+        end
+        
+         %calculating Area and Volume for trapezoidal method
+         area = zeros(1, x);
+         avgarea = zeros(1, xx);
+        
+         if method==2
+
+            
+         for i=1:x
+             if depth(1,i)>=0
+                 area(1,i)= (width + (slopefill*abs(depth(1,i))))*abs(depth(1,i));
+             end
+             if depth(1,i)<0
+                 area(1,i)= (width + (slopecut*abs(depth(1,i))))*abs(depth(1,i));
+             end
+
+         end
+
+         
+         for i=1:xx
+             avgarea(1,i)= (area(1,i)+area(1,i+1))/2; 
+         end
+
+           for i= 1:xx
+            if avgdepth(1,i)>0
+                
+                Vfill(1,i) =  X(i) * avgarea(1,i);
+            end
+
+            if avgdepth(1,i)<0
+                
+                Vcut(1,i) =  X(i) * avgarea(1,i);
+            end
+            end
+         
+        end
+        
+        %calculating Area and Volume for Prismoidal method
+        if method==3
+         for i=1:x
+             if depth(1,i)>=0
+                 area(1,i)= (width + (slopefill*abs(depth(1,i))))*abs(depth(1,i));
+             end
+             if depth(1,i)<0
+                 area(1,i)= (width + (slopecut*abs(depth(1,i))))*abs(depth(1,i));
+             end
+
+         end
+
+
+         for i=1:xx
+             avgarea(1,i)=  (width + (slopecut*abs(avgdepth(1,i))))*abs(avgdepth(1,i));
+         end
+
+         for i= 1:xx
+            if avgdepth(1,i)>0
+                
+                Vfill(1,i) = (X(1,i)* (area(1,i)+ area(1,i+1) + 4*avgarea(1,i)))/6;
+            end
+
+            if avgdepth(1,i)<0
+                
+                Vcut(1,i) =  (X(1,i)* (area(1,i)+ area(1,i+1) + 4*avgarea(1,i)))/6;
+            end
+         end
+        
+        end
+          
+        %Displaying output
+        totalcut = sum(Vcut);
+        totalfill = sum(Vfill);
+        xcut= totalcut;
+        xfill=totalfill;
+        if unit==1
+            fprintf('\n Volume of Total Cutting (in cubic meter) : ')
+        else
+            fprintf('\n Volume of Total Cutting (in cubic feet) : ')
+        end
+        fprintf('%.2f', xcut)
+
+        if unit==1
+            fprintf('\n Volume of Total Filling (in cubic meter) : ')
+        else
+            fprintf('\n Volume of Total Filling (in cubic feet) : ')
+        end
+        fprintf('%.2f\n', xfill)
+
+
+        %for plotting
+        intervals = totalnumofstation-1;
+        xlimit = intervals* stationinterval;
+        xx= linspace(0,xlimit,0.1);
+        intervalVec = zeros(1,totalnumofstation);
+        
+        for i = 1:totalnumofstation
+            intervalVec(1,i)= (i-1)*stationinterval;
+            
+        end
+        y1= interp1(intervalVec,RLvector,xx);
+        y2= interp1(intervalVec,FormationRL,xx);
+        
+        
+        end        
+        
+       
+        if (strcmp('No',getinput) || strcmp('no',getinput))
+            stopcri=1;
+            while(stopcri)
+                gradient= input('\n Enter gradient as x in y [x,y] : ');
+                check = ismatrix(gradient);
+                if check==1 && gradient(1,2)>=gradient(1,1) && floor(gradient(1,1))==ceil(gradient(1,1)) && floor(gradient(1,2))==ceil(gradient(1,2)) && gradient(1,1)>0 && gradient(1,2)>0
+                    stopcri=0;
+                    
+                else
+                    fprintf(2,'\n Invalid Input, Try again\n')
+                    stopcri=1;
+                end
+             end
+             
+             stopcri=1;
+             while(stopcri)
+             downorup= input('\n Is the slope downward or upward? \n Enter 1, if downward \n Enter 2, if upward : ');
+             if floor(downorup)==ceil(downorup) && (downorup==1 || downorup==2)
+                stopcri=0;
+             else
+             fprintf(2,'\n Invalid Input, Try again\n')
+             stopcri=1;  
+                        
+             end
+             end
+             
+        
+        if downorup==1
+                decrement = (stationinterval*gradient(1,1))/gradient(1,2);
+        end
+        if downorup==2
+                decrement = -(stationinterval*gradient(1,1))/gradient(1,2); 
+        end
+         FormationRL(1,1)= formlevel1;
+        for i= 2:totalnumofstation
+            FormationRL(1,i)= FormationRL(1,i-1) - decrement ;
+        end
+        
+        stopcri=1;
+        while(stopcri)
+        RLvector = input('\n Enter RL of existing ground level as a row vector : ');
+        if length(RLvector)==totalnumofstation
+            stopcri=0;
+        end
+        if length(RLvector)>totalnumofstation
+            fprintf(2,'\n Total number of input exceeds total number of stations , Try again\n')
+            stopcri=1;
+        end
+        if length(RLvector)<totalnumofstation
+            fprintf(2,'\n Total number of input is less than total number of stations , Try again\n')
+            stopcri=1;
+        end
+        end
+        
+        value = zeros(2,totalnumofstation);
+        for iter1 = 1: (totalnumofstation-1)
+            diff1 = FormationRL(iter1)-RLvector(iter1);
+            diff2 = FormationRL(iter1+1)-RLvector(iter1+1);
+            test = diff1*diff2;
+            if test<0
+                value(1,iter1) =FormationRL(iter1);
+                value(1,iter1 +1) =FormationRL(iter1 +1);
+                value(2,iter1) =RLvector(iter1);
+                value(2,iter1 +1) =RLvector(iter1 +1);
+
+            end
+        end
+
+        
+        countelement =0;
+         for ii= 1:1
+             for jj= 1: totalnumofstation
+                 if value(ii,jj)>1 && value(ii+1,jj+1)>1
+                     countelement= countelement+1;
+                 end
+             end
+         end
+        
+         countit =1;
+        
+        newformRLvector = zeros(1,totalnumofstation+countelement);
+         for iter1 = 1: (totalnumofstation-1)
+            diff1 = FormationRL(iter1)-RLvector(iter1);
+            diff2 = FormationRL(iter1+1)-RLvector(iter1+1);
+            test = diff1*diff2;
+            if test>0
+                newformRLvector(1,countit)= FormationRL(iter1);
+                countit=countit+1;
+            end
+            if test==0
+                newformRLvector(1,countit)= FormationRL(iter1);
+                countit=countit+1;
+            end
+
+            if test<0
+                newformRLvector(1,countit)= FormationRL(iter1);
+                newformRLvector(1,countit+1)= 0;
+                countit= countit+2;
+            end
+         end
+         newformRLvector(1,totalnumofstation+countelement)=FormationRL(totalnumofstation);
+        
+         countit =1;
+        
+        newGLvector = zeros(1,totalnumofstation+countelement);
+         for iter1 = 1: (totalnumofstation-1)
+            diff1 = FormationRL(iter1)-RLvector(iter1);
+            diff2 = FormationRL(iter1+1)-RLvector(iter1+1);
+            test = diff1*diff2;
+            if test>0
+                newGLvector(1,countit)= RLvector(iter1);
+                countit=countit+1;
+            end
+            if test==0
+                newGLvector(1,countit)= RLvector(iter1);
+                countit=countit+1;
+            end
+            if test<0
+                newGLvector(1,countit)= RLvector(iter1);
+                newGLvector(1,countit+1)= 0;
+                countit= countit+2;
+            end
+         end
+         newGLvector(1,totalnumofstation+countelement)=RLvector(totalnumofstation);
+         
+         %calculating depth
+         x= totalnumofstation+countelement;
+         depth = zeros(1, x);
+         for i= 1:x
+             depth(1,i)= newformRLvector(i) - newGLvector(i);
+         end
+         
+         %calculating average depth
+         xx = totalnumofstation+countelement-1;
+         avgdepth = zeros(1, xx);
+         for i=1:xx
+             avgdepth(1,i)= (depth(1,i)+depth(1,i+1))/2; 
+         end
+         
+         %creating interval vector considering intersections
+         X= zeros(1,xx);
+         
+         i=1;
+         while i<=xx
+             
+             if depth(1,i)*depth(1,i+1)~=0
+                 X(1,i)= stationinterval;
+             end
+             if depth(1,i)*depth(1,i+1)==0 && newGLvector(1,i+1)~=0
+                 X(1,i)= stationinterval;
+             end
+             if depth(1,i)*depth(1,i+1)==0 && newGLvector(1,i+1)==0
+                 X(1,i)= (stationinterval*abs(depth(1,i)))/(abs(depth(1,i)) + abs(depth(1, i+2)));
+                 X(1,i+1)= stationinterval- X(1,i);
+                 i= i+1;
+             end
+             i=i+1;
+         end
+         
+        Afill=zeros(1,xx);
+        Vfill=zeros(1,xx);
+        Acut=zeros(1,xx);
+        Vcut=zeros(1,xx);
+     
+        stopcri2=1;
+        while(stopcri2)
+        %Choosing Method
+        stopcri=1;
+        while(stopcri)
+        method  = input ('\nBy which method do you want to calculate?\n\n Enter 1, for Average Height Method / Mid Section Formulae \n Enter 2, For Trapezoidal Formulae / Average End Area Method / Mean Sectional Area Method \n Enter 3, For Prismoidal Formulae \n Enter 0, To Terminate the Program              :');
+        
+        if method==1 || method==2 || method==3||method==0
+            stopcri=0;
+        else
+            fprintf(2,'\n Invalid Input , Try again\n')
+            stopcri=1;
+        end
+        end
+        
+        
+
+        if method==1
+        for i= 1:xx
+            if avgdepth(1,i)>0
+                Afill(1,i) =  ((width + (slopefill*abs(avgdepth(1,i))))*abs(avgdepth(1,i)));
+                Vfill(1,i) =  X(i) * Afill(1,i);
+            end
+
+            if avgdepth(1,i)<0
+                Acut(1,i) =  ((width + (slopecut*abs(avgdepth(1,i))))*abs(avgdepth(1,i)));
+                Vcut(1,i) =  X(i) * Acut(1,i);
+            end
+            if avgdepth(1,i)==0
+                Acut(1,i)=0;
+                Afill(1,i)=0;
+                Vcut(1,i)=0;
+                Vfill(1,i)=0;
+            end
+        end
+
+        totalcut = sum(Vcut);
+        totalfill = sum(Vfill);
+        xcut= totalcut;
+        xfill=totalfill;
+        
+        if unit==1
+            fprintf('\n Volume of Total Cutting (in cubic meter) : ')
+        else
+            fprintf('\n Volume of Total Cutting (in cubic feet) : ')
+        end
+        fprintf('%.2f', xcut)
+
+        if unit==1
+            fprintf('\n Volume of Total Filling (in cubic meter) : ')
+        else
+            fprintf('\n Volume of Total Filling (in cubic feet) : ')
+        end
+        fprintf('%.2f\n', xfill)
+
+        end
+
+        %calculating Area and Volume for trapezoidal method
+        area = zeros(1, x);
+        avgarea = zeros(1, xx);
+        
+         if method==2
+
+            
+         for i=1:x
+             if depth(1,i)>=0
+                 area(1,i)= (width + (slopefill*abs(depth(1,i))))*abs(depth(1,i));
+             end
+             if depth(1,i)<0
+                 area(1,i)= (width + (slopecut*abs(depth(1,i))))*abs(depth(1,i));
+             end
+
+         end
+
+         
+         for i=1:xx
+             avgarea(1,i)= (area(1,i)+area(1,i+1))/2; 
+         end
+
+           for i= 1:xx
+            if avgdepth(1,i)>0
+                
+                Vfill(1,i) =  X(i) * avgarea(1,i);
+            end
+
+            if avgdepth(1,i)<0
+                
+                Vcut(1,i) =  X(i) * avgarea(1,i);
+            end
+           end
+
+           totalcut = sum(Vcut);
+        totalfill = sum(Vfill);
+        xcut= totalcut;
+        xfill=totalfill;
+        
+        if unit==1
+            fprintf('\n Volume of Total Cutting (in cubic meter) : ')
+        else
+            fprintf('\n Volume of Total Cutting (in cubic feet) : ')
+        end
+        fprintf('%.2f', xcut)
+
+        if unit==1
+            fprintf('\n Volume of Total Filling (in cubic meter) : ')
+        else
+            fprintf('\n Volume of Total Filling (in cubic feet) : ')
+        end
+        fprintf('%.2f\n', xfill)
+
+         
+         end
+
+         %calculating Area and Volume for Prismoidal method
+        if method==3
+         for i=1:x
+             if depth(1,i)>=0
+                 area(1,i)= (width + (slopefill*abs(depth(1,i))))*abs(depth(1,i));
+             end
+             if depth(1,i)<0
+                 area(1,i)= (width + (slopecut*abs(depth(1,i))))*abs(depth(1,i));
+             end
+
+         end
+
+
+         for i=1:xx
+             if avgdepth(1,i)>=0
+             avgarea(1,i)=  (width + (slopefill*abs(avgdepth(1,i))))*abs(avgdepth(1,i));
+             end
+             if avgdepth(1,i)<0
+             avgarea(1,i)=  (width + (slopecut*abs(avgdepth(1,i))))*abs(avgdepth(1,i));
+             end
+
+         end
+
+         
+         
+         for i= 1:xx
+            if avgdepth(1,i)>0
+                
+                Vfill(1,i) = (X(1,i)* (area(1,i)+ area(1,i+1) + 4*avgarea(1,i)))/6;
+            end
+
+            if avgdepth(1,i)<0
+                
+                Vcut(1,i) =  (X(1,i)* (area(1,i)+ area(1,i+1) + 4*avgarea(1,i)))/6;
+            end
+         end
+
+         totalcut = sum(Vcut);
+        totalfill = sum(Vfill);
+        xcut= totalcut;
+        xfill=totalfill;
+        
+        if unit==1
+            fprintf('\n Volume of Total Cutting (in cubic meter) : ')
+        else
+            fprintf('\n Volume of Total Cutting (in cubic feet) : ')
+        end
+        fprintf('%.2f', xcut)
+
+        if unit==1
+            fprintf('\n Volume of Total Filling (in cubic meter) : ')
+        else
+            fprintf('\n Volume of Total Filling (in cubic feet) : ')
+        end
+        fprintf('%.2f\n', xfill)
+
+      
+        end
+
+        if method==0
+            stopcri2=0;
+        end
+
+        end
+        
+        %for plotting
+        intervals = totalnumofstation-1;
+        xlimit = intervals* stationinterval;
+        xx= linspace(0,xlimit,0.1);
+        intervalVec = zeros(1,totalnumofstation);
+        
+        for i = 1:totalnumofstation
+            intervalVec(1,i)= (i-1)*stationinterval;
+            
+        end
+       
+        y1= interp1(intervalVec,RLvector,xx);
+        y2= interp1(intervalVec,FormationRL,xx);
+
+        end
+        hold on
+        plot(xx,y1,xx,y2)
+        
+        plot(intervalVec,RLvector,'o-',intervalVec,FormationRL,'o-')
+        
+end
+        
+        
+        
+        
+        
+        
+
